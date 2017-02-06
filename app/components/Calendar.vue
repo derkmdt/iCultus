@@ -5,16 +5,19 @@
     #action
       .action(href="javascript:void(0)", @click="prev", style="transform: rotate(180deg)") ➔
       .action(href="javascript:void(0)", @click="next") ➔
-      
+
     #week
+      .grid.first() {{ 'Wk' }}
       .grid(v-for="i in 7") {{ weeks[i] }}
+  #weeknr
+    .grid.square.week(v-for="i in amountOfWeeks") {{ (firstWeekNumber + i) > 52 ? ((52 - (firstWeekNumber + i)) * -1) : (firstWeekNumber + i) }}
   #day
     .grid.square.last(v-for="i in lastMonthRestDays") {{ lastMonthLastDayNumber - ( lastMonthRestDays - 1 - i) }}
     .grid.square(v-for="i in daysOfMonth", :class="{ current: day === i + 1 && isCurrentDay }") {{ i + 1 }}
     .grid.square.next(v-for="i in nextMonthRestDays") {{ i + 1 }}
   #tool-bar
     #menu.tool(@click="popUpMenu") &#9776;
-    #calendar-app.tool 
+    #calendar-app.tool
       img(src="../assets/images/calendar.png", @click="launchCalendar")
 </template>
 
@@ -28,8 +31,6 @@
   let MenuItem = window.remote.require('menu-item')
 
   moment.locale(app.getLocale())
-  // moment.locale('en-US')
-
 
   export default {
     data(){
@@ -65,14 +66,26 @@
         return moment(this.today).startOf('month').day()
       },
 
+      firstWeekNumber(){
+        const todayInstance = moment(moment(this.today));
+        const lastMonthWeekNr = todayInstance.month(this.month).startOf('month').isoWeek();
+        return this.lastMonthRestDays ? lastMonthWeekNr : lastMonthWeekNr + 1
+      },
+
       lastMonthLastDayNumber(){
         let todayInstance = moment(moment(this.today))
         return todayInstance.month(this.lastMonth).endOf('month').date()
       },
 
+      amountOfWeeks(){
+        return Math.ceil(42 / 7);
+      },
+
       lastMonthRestDays(){
         let todayInstance = moment(moment(this.today))
+        // console.log('todayInstance',todayInstance);
         let lastDayOfLastMonth = todayInstance.month(this.lastMonth).endOf('month').day()
+        // console.log('lastDayOfLastMonth',lastDayOfLastMonth);
         return lastDayOfLastMonth === 6 ? 0 : lastDayOfLastMonth + 1
       },
 
@@ -81,6 +94,7 @@
       },
 
       nextMonthRestDays(){
+        // console.log('nextMonthRestDays',42 - (this.lastMonthRestDays + this.daysOfMonth));
         return 42 - (this.lastMonthRestDays + this.daysOfMonth)
       },
 
@@ -169,9 +183,9 @@
 
     .grid{
       display: inline-block;
-      width: 14.28%;
+      width: 14.285%;
       text-align: center;
-      
+
       &.square{
         border-radius: 2px;
         font-weight: lighter;
@@ -198,7 +212,6 @@
 
     #head{
       width: 100%;
-      height: 45px;
       background: linear-gradient(to bottom, #7BBFE0, #75ABDD);
       position: relative;
       text-align: center;
@@ -230,22 +243,45 @@
       }
 
       #week{
-        position: absolute;
+        position: relative;
         width: 100%;
-        /*padding-top: 4px;*/
-        /*padding-bottom: 3px;*/
-        bottom: .2em;
+        height:100%;
+        padding: .8em 0;
         font-size: .75em;
         color: #fff;
+
+        .grid{
+          display: inline-block;
+          width: 13.14%;
+
+          &.first{
+            width: 8%;
+          }
+        }
       }
 
-      
     }
 
     #day{
       box-sizing: border-box;
+      display: inline-block;
       padding: .2em;
       padding-bottom: 0;
+      width: 91.2%;
+    }
+
+    #weeknr{
+      display: inline-block;
+      width: 8%;
+      text-align: center;
+      padding: .2em 0 .2em .2em;
+
+      .grid{
+        &.week{
+          background-color: #e6f2ff;
+          width: 100%;
+        }
+      }
     }
 
     #tool-bar{
